@@ -1,0 +1,2 @@
+Ver archivos de ubuntu
+\\wsl$\Ubuntu-20.04\home\sergimayol
