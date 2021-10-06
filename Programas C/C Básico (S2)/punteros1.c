@@ -33,14 +33,14 @@ int main()
     /*Los punteros se deben inicializar, ya sea al declararlos o mediante una asignación.Un puntero puede inicializarse a NULL(valor 0) o a una dirección.int *p = NULL; /*Inicializa un puntero a 0 con la constante simbólica NULL de stdio.h.
                             No apunta a nada. */
     printf("dirección de x:\t\t\t\t\t &x = %p\n", &x);
-    printf("valor de x:\t\t\t\t\t x = %d\n", x);
+    printf("valor de x:\t\t\t\t\t\t x = %d\n", x);
 
     printf("dirección de px:\t\t\t\t &px= %p\n", &px);
     printf("valor de px:\t\t\t\t\t px = %p  //es la dirección de x\n", px);
 
     printf("dirección de y:\t\t\t\t\t &y = %p\n", &y);
     printf("contenido de la dirección almacenada en px:\t *px = %d\n", *px);
-    printf("valor de y:\t\t\t\t\t y = %d\n", y);
+    printf("valor de y:\t\t\t\t\t\t y = %d\n", y);
 
     return 0;
 }

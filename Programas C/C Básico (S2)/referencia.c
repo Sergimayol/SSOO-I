@@ -24,7 +24,6 @@ int main()
     printf("***Paso de parámetros por referencia***\n");
     printf("antes: x = %d, y = %d\n", x, y);
     funcionReferencia(&x, &y);
-    funcionReferencia(&x, &y);
     printf("después: x = %d, y = %d\n", x, y);
 
     return 0;
