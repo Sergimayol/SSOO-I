@@ -1,2 +1,3 @@
 Ver archivos de ubuntu
 \\wsl$\Ubuntu-20.04\home\sergimayol
+Users/Sergi/Desktop/SERGI/UIB/2nd/Sist Operativos I/Programas C/Práctica 1
