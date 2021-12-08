@@ -126,14 +126,112 @@ int internal_jobs(char **args)
     return 0;
 }
 
-// Implementación del comando interno bg
-int internal_fg(char **args)
+// Añade el carácter '&' de la linea
+char *add_and(char *str)
 {
+    char *aux = malloc(strlen(str) + 1);
+    for (int i = 0; i < strlen(str); i++)
+    {
+        aux[i] = str[i];
+    }
+    aux[strlen(str)] = '&';
+    return aux;
 }
 
+// Quita el carácter '&' de la linea
+char *remove_and(char *str)
+{
+    char *aux = malloc(strlen(str));
+    for (int i = 0; i < strlen(str); i++)
+    {
+        if ((i == strlen(str) - 1) && (str[i] == '&'))
+        {
+            aux[i] = '\0';
+        }
+        else
+        {
+            aux[i] = str[i];
+        }
+    }
+    return aux;
+}
 // Implementación del comando interno fg
+int internal_fg(char **args)
+{
+    signal(SIGTSTP, ctrlz);
+    int pos;
+    // cogemos el string y lo pasamos a un integer
+    if (args[1] != NULL)
+    {
+        sscanf(args[1], "%d", &pos);
+        if ((pos > n_pids) || (pos == 0))
+        {
+            fprintf(stderr, "fg %d: No existe ese trabajo\n", pos);
+        }
+        else
+        {
+            if (jobs_list[pos].status == 'D')
+            {
+                kill(jobs_list[pos].pid, SIGCONT);
+                fprintf(stderr, "Continuacion del trabajo con PID: %d(%s)\n",
+                        jobs_list[pos].pid, jobs_list[pos].cmd);
+            }
+            // ponemos el trabajo que pasa a foreground en la posicion 0
+            jobs_list[0].pid = jobs_list[pos].pid;
+            jobs_list[0].status = jobs_list[pos].status;
+            strcpy(jobs_list[0].cmd, remove_and(jobs_list[pos].cmd));
+            // eliminar trabajo de la lista de trabajos
+            jobs_list_remove(pos);
+            fprintf(stderr, "Command_line: %s\n", jobs_list[0].cmd);
+            signal(SIGTSTP, ctrlz);
+            // mientras haya un trabajo en foreground espera
+            while ((jobs_list[0].pid != 0))
+            {
+                pause();
+            }
+        }
+    }
+    else
+    {
+        fprintf(stderr, "fg: argumentos invalidos\n");
+    }
+    return 1;
+}
+
+// Implementación del comando interno bg
 int internal_bg(char **args)
 {
+    int pos;
+    if (args[1] != NULL)
+    {
+        // cogemos el string y lo pasamos a un integer
+        sscanf(args[1], "%d", &pos);
+        if ((pos > n_pids) || (pos == 0))
+        {
+            fprintf(stderr, "bg %d: no existe ese trabajo\n", pos);
+        }
+        else
+        {
+            if (jobs_list[pos].status == 'E')
+            {
+                fprintf(stderr, "bg: el trabajo %d ya esta ejecutandose en background\n", pos);
+            }
+            else
+            {
+                kill(jobs_list[pos].pid, SIGCONT);
+                jobs_list[pos].status = 'E';
+                strcpy(jobs_list[pos].cmd, add_and(jobs_list[pos].cmd));
+                printf("%d. PID: %d\t Line: %s\t Status: %c\n",
+                       pos, jobs_list[pos].pid, jobs_list[pos].cmd,
+                       jobs_list[pos].status);
+            }
+        }
+    }
+    else
+    {
+        fprintf(stderr, "bg: argumentos invalidos\n");
+    }
+    return 1;
 }
 
 // Función booleana que recorrerá la lista de argumentos buscando un token ‘>’,
@@ -255,9 +353,13 @@ int execute_line(char *line)
                 signal(SIGCHLD, SIG_DFL);
                 // Ignora la señal SIGINT
                 signal(SIGINT, SIG_IGN);
+                signal(SIGTSTP, SIG_IGN);
                 is_output_redirection(args);
-                execvp(args[0], args);
-                exit(-1);
+                if (execvp(args[0], args) == -1)
+                {
+                    fprintf(stderr, "%s: no se encontró la orden\n", line);
+                    exit(-1);
+                }
             }
             else if (pid > 0) // Proceso padre
             {
