@@ -145,10 +145,11 @@ void setup()
   {
     palillo[i] = xSemaphoreCreateMutex();
   }
+}
 
-  while (1)
-  {
-    // Los filósofos empiezan a comer
+void loop()
+{
+  // Los filósofos empiezan a comer
     for (int i = 0; i < NUM_OF_PHILOSOPHERS; i++)
     {
       sprintf(tarea, "Philosopher %i", i);
@@ -167,12 +168,4 @@ void setup()
     {
       xSemaphoreTake(semaforo_listo, portMAX_DELAY);
     }
-  }
-  // Print para saber que no se ha producido deadlock en todo el programa
-  Serial.println("\nNO ha habido deadlock, el programa ha finalizado!");
-}
-
-void loop()
-{
-  // No hacer nada aquí
 }
